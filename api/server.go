@@ -18,6 +18,7 @@ func SetupRouter() *gin.Engine {
 		routes.RouteMahasiswa(v1)
 		routes.RouterUser(v1)
 		routes.RouteAuth(v1)
+		routes.RouteCustomer(v1)
 	}
 	return router
 }
