@@ -8,7 +8,7 @@ CRUD API Boilerplate using clean architecture
 ### Prerequisites
 - Golang(>=1.11) - Download and Install [Golang](https://golang.org/)
 ```
-  clone this priject
+  clone this project
   $ cd golang-boilerplate-v4
   $ go mod download
   $ go build 
