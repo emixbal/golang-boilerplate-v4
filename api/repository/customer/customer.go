@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"golang-websocket/api/models"
 	"golang-websocket/api/repository"
+	"log"
+	"strconv"
 )
 
 type mysqlCustomerRepository struct {
@@ -16,11 +18,11 @@ func NewCustomerRepository(Conn *sql.DB) repository.CustomerRepository {
 }
 
 // List implements repository.CustomerRepository.
-func (m *mysqlCustomerRepository) List(ctx context.Context) (customers []*models.Customer, err error) {
+func (db *mysqlCustomerRepository) List(ctx context.Context) (customers []*models.Customer, err error) {
 
 	query := `SELECT id, name, phone, created_at FROM customers`
 
-	rows, err := m.Conn.QueryContext(ctx, query)
+	rows, err := db.Conn.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -43,13 +45,33 @@ func (m *mysqlCustomerRepository) List(ctx context.Context) (customers []*models
 }
 
 // Delete implements repository.CustomerRepository.
-func (db *mysqlCustomerRepository) Delete(ctx context.Context, id int) error {
-	panic("unimplemented")
+func (db *mysqlCustomerRepository) Delete(ctx context.Context, id int) (err error) {
+	ids := strconv.Itoa(id)
+	query := `DELETE FROM customers WHERE id = ?`
+
+	stmt, err := db.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	_, err = stmt.ExecContext(ctx, query, ids)
+	if err != nil {
+		return err
+	}
+	return
 }
 
 // Detail implements repository.CustomerRepository.
-func (*mysqlCustomerRepository) Detail(ctx context.Context, id int) (*models.Customer, error) {
-	panic("unimplemented")
+func (db *mysqlCustomerRepository) Detail(ctx context.Context, id int) (customer *models.Customer, err error) {
+	customer = &models.Customer{}
+
+	query := `SELECT id, name, phone, created_at FROM customers WHERE id = ?`
+	err = db.Conn.QueryRowContext(ctx, query, id).Scan(&customer.ID, &customer.Name, &customer.Phone, &customer.CreatedAt)
+
+	if err != nil {
+		log.Panic(err)
+		return nil, err
+	}
+	return customer, nil
 }
 
 // Insert implements repository.CustomerRepository.

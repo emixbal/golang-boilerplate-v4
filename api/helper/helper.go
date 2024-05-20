@@ -6,17 +6,30 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"time"
 )
 
 type Res struct {
-	Error   bool        `json:"error"`
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	TraceID   string      `json:"trace_id"`
+	Timestamp time.Time   `json:"timestamp"`
+	Error     bool        `json:"error"`
+	Code      int         `json:"code"`
+	Message   string      `json:"message"`
+	Data      interface{} `json:"data"`
 }
 
 func Responses(res http.ResponseWriter, code int, msg string, payload interface{}) {
 	var result Res
+
+	// traceIdInf := ctx.Value("requestid")
+	// traceId := ""
+	// if traceIdInf != nil {
+	// 	traceId = traceIdInf.(string)
+	// }
+	// result.TraceID = traceId
+
+	result.Timestamp = time.Now()
+
 	if code >= 400 {
 		result.Error = true
 		result.Code = code

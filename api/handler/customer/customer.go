@@ -29,13 +29,14 @@ func NewCustomerHandler() CustomerHandler {
 	}
 }
 
-func (m *CustomerHandler) List(c *gin.Context) {
+func (h *CustomerHandler) List(c *gin.Context) {
 	var res = c.Writer
+
 	ctx := c.Request.Context()
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	customer, err := m.CustomerUsecase.List(ctx)
+	customer, err := h.CustomerUsecase.List(ctx)
 	if err != nil {
 		helper.ErrorCustomStatus(res, http.StatusInternalServerError, err.Error())
 		return
@@ -43,7 +44,7 @@ func (m *CustomerHandler) List(c *gin.Context) {
 	helper.Responses(res, http.StatusOK, "Success", customer)
 }
 
-func (m *CustomerHandler) Detail(c *gin.Context) {
+func (h *CustomerHandler) Detail(c *gin.Context) {
 	var res = c.Writer
 	id, err := helper.ToInt(c.Param("id"))
 	if err != nil {
@@ -56,15 +57,16 @@ func (m *CustomerHandler) Detail(c *gin.Context) {
 		ctx = context.Background()
 	}
 
-	customer, err := m.CustomerUsecase.Detail(ctx, id)
+	customer, err := h.CustomerUsecase.Detail(ctx, id)
 	if err != nil {
 		helper.HandlerErrorQuery(res, err)
 		return
 	}
+
 	helper.Responses(res, http.StatusOK, "Success", customer)
 }
 
-func (m *CustomerHandler) Insert(c *gin.Context) {
+func (h *CustomerHandler) Insert(c *gin.Context) {
 	var customer models.Customer
 	var res = c.Writer
 	ctx := c.Request.Context()
@@ -77,17 +79,7 @@ func (m *CustomerHandler) Insert(c *gin.Context) {
 		return
 	}
 
-	// var validators *validator.Validate
-	// config := &validator.Config{TagName: "validate"}
-	// validators = validator.New(config)
-	// err := validators.Struct(customer)
-
-	// if err != nil {
-	// 	helper.ErrorCustomStatus(res, http.StatusBadRequest, err.Error())
-	// 	return
-	// }
-
-	result, err := m.CustomerUsecase.Insert(ctx, customer)
+	result, err := h.CustomerUsecase.Insert(ctx, customer)
 	if err != nil {
 		helper.ErrorCustomStatus(res, http.StatusInternalServerError, err.Error())
 		return
@@ -95,7 +87,7 @@ func (m *CustomerHandler) Insert(c *gin.Context) {
 	helper.Responses(res, http.StatusOK, "Success", result)
 }
 
-func (m *CustomerHandler) Update(c *gin.Context) {
+func (h *CustomerHandler) Update(c *gin.Context) {
 	var datas = make(map[string]interface{})
 	var res = c.Writer
 	id, err := helper.ToInt(c.Param("id"))
@@ -113,7 +105,7 @@ func (m *CustomerHandler) Update(c *gin.Context) {
 		ctx = context.Background()
 	}
 
-	customer, err := m.CustomerUsecase.Update(ctx, datas, id)
+	customer, err := h.CustomerUsecase.Update(ctx, datas, id)
 	if err != nil {
 		helper.HandlerErrorQuery(res, err)
 		return
@@ -122,7 +114,7 @@ func (m *CustomerHandler) Update(c *gin.Context) {
 	helper.Responses(res, http.StatusOK, "Succes", customer)
 }
 
-func (m *CustomerHandler) Delete(c *gin.Context) {
+func (h *CustomerHandler) Delete(c *gin.Context) {
 	var res = c.Writer
 	id, err := helper.ToInt(c.Param("id"))
 	if err != nil {
@@ -135,7 +127,7 @@ func (m *CustomerHandler) Delete(c *gin.Context) {
 		ctx = context.Background()
 	}
 
-	err = m.CustomerUsecase.Delete(ctx, id)
+	err = h.CustomerUsecase.Delete(ctx, id)
 	if err != nil {
 		helper.HandlerErrorQuery(res, err)
 		return

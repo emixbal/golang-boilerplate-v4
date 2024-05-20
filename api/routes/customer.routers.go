@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"golang-websocket/api/controllers/customer"
+	"golang-websocket/api/handler/customer"
 
 	"github.com/gin-gonic/gin"
 )
