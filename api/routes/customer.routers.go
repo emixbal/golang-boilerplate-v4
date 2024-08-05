@@ -3,21 +3,31 @@ package routes
 import (
 	"golang-websocket/api/handler/customer"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
-func RouteCustomer(route *gin.RouterGroup) {
+func RouteCustomer(route fiber.Router) {
 
 	handlerCustomer := customer.NewCustomerHandler()
-	router := route.Group("/customer")
+	r := route.Group("/customer")
 	{
-		// router.Use(middleware.MiddlewareAuthentication)
+		// r.Use(middleware.MiddlewareAuthentication)
 		{
-			router.GET("/list", handlerCustomer.List)
-			router.GET("/detail/:id", handlerCustomer.Detail)
-			router.POST("/insert", handlerCustomer.Insert)
-			router.PUT("/update/:id", handlerCustomer.Update)
-			router.DELETE("/delete/:id", handlerCustomer.Delete)
+			r.Get("/list", func(c *fiber.Ctx) error {
+				return handlerCustomer.List(c)
+			})
+			r.Get("/detail/:id", func(c *fiber.Ctx) error {
+				return handlerCustomer.Detail(c)
+			})
+			r.Post("/insert", func(c *fiber.Ctx) error {
+				return handlerCustomer.Insert(c)
+			})
+			r.Put("/update/:id", func(c *fiber.Ctx) error {
+				return handlerCustomer.Update(c)
+			})
+			r.Delete("/delete/:id", func(c *fiber.Ctx) error {
+				return handlerCustomer.Delete(c)
+			})
 		}
 	}
 }

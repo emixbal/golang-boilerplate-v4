@@ -1,7 +1,6 @@
 package customer
 
 import (
-	"context"
 	"golang-websocket/api/database"
 	"golang-websocket/api/helper"
 	"golang-websocket/api/models"
@@ -11,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
 )
 
@@ -29,109 +28,112 @@ func NewCustomerHandler() CustomerHandler {
 	}
 }
 
-func (h *CustomerHandler) List(c *gin.Context) {
-	var res = c.Writer
-
-	ctx := c.Request.Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
+func (h *CustomerHandler) List(c *fiber.Ctx) error {
+	ctx := c.Context()
 	customer, err := h.CustomerUsecase.List(ctx)
 	if err != nil {
-		helper.ErrorCustomStatus(res, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
-	helper.Responses(res, http.StatusOK, "Success", customer)
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Success",
+		"data":    customer,
+	})
 }
 
-func (h *CustomerHandler) Detail(c *gin.Context) {
-	var res = c.Writer
-	id, err := helper.ToInt(c.Param("id"))
+func (h *CustomerHandler) Detail(c *fiber.Ctx) error {
+	id, err := helper.ToInt(c.Params("id"))
 	if err != nil {
-		helper.ErrorCustomStatus(res, http.StatusBadRequest, err.Error())
-		return
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
-	ctx := c.Request.Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
+	ctx := c.Context()
 	customer, err := h.CustomerUsecase.Detail(ctx, id)
 	if err != nil {
-		helper.HandlerErrorQuery(res, err)
-		return
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
-	helper.Responses(res, http.StatusOK, "Success", customer)
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Success",
+		"data":    customer,
+	})
 }
 
-func (h *CustomerHandler) Insert(c *gin.Context) {
+func (h *CustomerHandler) Insert(c *fiber.Ctx) error {
 	var customer models.Customer
-	var res = c.Writer
-	ctx := c.Request.Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
+	ctx := c.Context()
 
-	if err := c.ShouldBindJSON(&customer); err != nil {
-		helper.ErrorCustomStatus(res, http.StatusBadRequest, err.Error())
-		return
+	if err := c.BodyParser(&customer); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
 	result, err := h.CustomerUsecase.Insert(ctx, customer)
 	if err != nil {
-		helper.ErrorCustomStatus(res, http.StatusInternalServerError, err.Error())
-		return
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
-	helper.Responses(res, http.StatusOK, "Success", result)
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Success",
+		"data":    result,
+	})
 }
 
-func (h *CustomerHandler) Update(c *gin.Context) {
-	var datas = make(map[string]interface{})
-	var res = c.Writer
-	id, err := helper.ToInt(c.Param("id"))
+func (h *CustomerHandler) Update(c *fiber.Ctx) error {
+	id, err := helper.ToInt(c.Params("id"))
 	if err != nil {
-		helper.ErrorCustomStatus(res, http.StatusBadRequest, err.Error())
-		return
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
-	datas["nama"] = c.Request.FormValue("nama")
-	datas["nim"] = c.Request.FormValue("nim")
-	datas["kelas"] = c.Request.FormValue("kelas")
-
-	ctx := c.Request.Context()
-	if ctx == nil {
-		ctx = context.Background()
+	var datas = make(map[string]interface{})
+	if err := c.BodyParser(&datas); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
+	ctx := c.Context()
 	customer, err := h.CustomerUsecase.Update(ctx, datas, id)
 	if err != nil {
-		helper.HandlerErrorQuery(res, err)
-		return
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
-	helper.Responses(res, http.StatusOK, "Succes", customer)
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Success",
+		"data":    customer,
+	})
 }
 
-func (h *CustomerHandler) Delete(c *gin.Context) {
-	var res = c.Writer
-	id, err := helper.ToInt(c.Param("id"))
+func (h *CustomerHandler) Delete(c *fiber.Ctx) error {
+	id, err := helper.ToInt(c.Params("id"))
 	if err != nil {
-		helper.ErrorCustomStatus(res, http.StatusBadRequest, err.Error())
-		return
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
-	ctx := c.Request.Context()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
+	ctx := c.Context()
 	err = h.CustomerUsecase.Delete(ctx, id)
 	if err != nil {
-		helper.HandlerErrorQuery(res, err)
-		return
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
 
-	helper.Responses(res, http.StatusOK, "Success", "Data Telah Dihapus")
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Success",
+		"data":    "Data Telah Dihapus",
+	})
 }
